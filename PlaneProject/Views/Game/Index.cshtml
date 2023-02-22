@@ -1,0 +1,161 @@
+﻿@using PlaneProject.Models
+
+@model Player
+
+@{
+}
+
+<style>
+.cellCss {
+    width:30px;height:30px;border:solid;padding:unset;text-align:center;cursor: crosshair;
+}
+.axisCss {
+    width:30px;height:30px;padding:unset;
+}
+.placedPlaneCss {
+    background-color:green !important;
+}
+.hitPlaneCss {
+    background-color:orange !important;
+}
+.deadPlaneCss {
+    background-color:red !important;
+}
+.wrongPlaneCss {
+    background-color:yellow !important;
+}
+</style>
+
+<input type="text" id="fire" />
+<input type="button" id="fireButton" value="Fire" />
+<div id="fireResult"></div>
+
+<br />
+
+<div>
+    <div style="float:left;padding-right:50px;">
+        <p><b>Own grid:</b></p>
+        <table id="ownGrid" class="table table-sm" style="width:330px">
+            <tbody>
+            </tbody>
+        </table>
+        <input type="button" id="setOnePlane" value="Save Plane" />
+    </div>
+    <div>
+        <p><b>Opponent grid:</b></p>
+        <table id="opponentGrid" class="table table-sm"  style="width:330px">
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<input type="button" id="startButton" value="Start the game" />
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script>
+$(document).ready(function() {
+    createGrid("ownGrid", "own");
+    createGrid("opponentGrid", "opp");
+});
+
+function createGrid(tableName, tableOwn)
+{
+    var gridInnerHtml = '';
+    var letterAxis = '';
+    var letter = '';
+    var cells = '';
+    for (var x=10; x>=1; x--)
+    {
+        gridInnerHtml = gridInnerHtml + '<tr>';
+        gridInnerHtml = gridInnerHtml + '<th class="axisCss">'+x+'</th>';
+        for (l = 0; l < 10; l++)
+        {
+            letter = (l+10).toString(36).toUpperCase();
+            if (tableOwn == "opp")
+            {
+                cells = '<td id="'+ tableOwn +'_'+ x + letter +'" class="cellCss" onclick="fire('+@Model.OpponentId + ',' + x + ',\'' + letter +'\')">'+ x + letter +'</td>';
+            }
+            else
+            {// onclick="setPlane('+ x + ',\'' + letter +'\')"
+                cells = '<td id="'+ tableOwn +'_'+ x + letter +'" class="cellCss" onclick="addClickedCss(this)">'+ x + letter +'</td>';
+            }
+            gridInnerHtml = gridInnerHtml + cells;
+            if (x == 1)
+            {
+                letterAxis = letterAxis + '<th>'+letter+'</th>';
+            }
+        }
+        gridInnerHtml = gridInnerHtml + '</tr>';
+    }
+    gridInnerHtml = gridInnerHtml + '<tr><th></th>' + letterAxis + '</tr>';
+    document.getElementById(tableName).firstElementChild.innerHTML = gridInnerHtml;
+}
+
+function fire(opponentId, x, y)
+{
+    console.log('pressed fire '+ x + y);
+    //connection.invoke("SendFiring", opponentId, x, y).catch(function (err) {
+    //    return console.error(err.toString());
+    //});
+}
+
+function addClickedCss(row)
+{
+    row.classList.add('placedPlaneCss');
+}
+
+$('#setOnePlane').click(function(){
+
+
+
+
+    connection.invoke("SetOnePlane", x, y).catch(function (err) {
+        return console.error(err.toString());
+    });
+});
+
+//function setOnePlane(x, y)
+//{
+//    console.log('pressed setPlane '+ x + y);
+//}
+
+    "use strict";
+    var connection = new signalR.HubConnectionBuilder().withUrl("/communicationHub").build();
+
+    //document.getElementById("fireButton").disabled = true;
+
+    connection.on("ReceiveFiringResult", function (opponentId, x, y) {
+
+        console.log('ReceiveFiringResult');
+        document.getElementById("fireResult").innerHTML = opponentId + ',' + x + ',' + y;
+
+    });
+
+    connection.start().then(function () {
+        //document.getElementById("fireButton").disabled = false;
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+
+
+    //$("*[id*='opp_']").addEventListener("click", function (event) {
+
+    ////document.getElementById("fireButton").addEventListener("click", function (event) {
+
+    //    var opponentId = "1";
+    //    var x = 1;
+    //    var y = 'A';
+
+    //    connection.invoke("SendFiring", opponentId, x, y).catch(function (err) {
+    //        return console.error(err.toString());
+    //    });
+    //    event.preventDefault();
+    //});
+
+
+
+
+
+
+</script>
