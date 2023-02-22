@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\Projects\\NewProject\\PlaneProject\\PlaneProject\\PlaneProject.csproj": {}
+    "d:\\Projects\\NewProject\\PlaneApp\\PlaneProject\\PlaneProject\\PlaneProject.csproj": {}
   },
   "projects": {
-    "d:\\Projects\\NewProject\\PlaneProject\\PlaneProject\\PlaneProject.csproj": {
+    "d:\\Projects\\NewProject\\PlaneApp\\PlaneProject\\PlaneProject\\PlaneProject.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Projects\\NewProject\\PlaneProject\\PlaneProject\\PlaneProject.csproj",
+        "projectUniqueName": "d:\\Projects\\NewProject\\PlaneApp\\PlaneProject\\PlaneProject\\PlaneProject.csproj",
         "projectName": "PlaneProject",
-        "projectPath": "d:\\Projects\\NewProject\\PlaneProject\\PlaneProject\\PlaneProject.csproj",
+        "projectPath": "d:\\Projects\\NewProject\\PlaneApp\\PlaneProject\\PlaneProject\\PlaneProject.csproj",
         "packagesPath": "C:\\Users\\bk\\.nuget\\packages\\",
-        "outputPath": "d:\\Projects\\NewProject\\PlaneProject\\PlaneProject\\obj\\",
+        "outputPath": "d:\\Projects\\NewProject\\PlaneApp\\PlaneProject\\PlaneProject\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
