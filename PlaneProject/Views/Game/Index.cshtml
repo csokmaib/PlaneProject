@@ -26,20 +26,25 @@
 }
 </style>
 
-<input type="text" id="fire" />
+
+<div id="waitForOpponentMsg"></div>
+
+
+@*<input type="text" id="fire" />
 <input type="button" id="fireButton" value="Fire" />
-<div id="fireResult"></div>
+<div id="fireResult"></div>*@
 
 <br />
 
-<div>
+<div id="gameDiv">
     <div style="float:left;padding-right:50px;">
         <p><b>Own grid:</b></p>
         <table id="ownGrid" class="table table-sm" style="width:330px">
             <tbody>
             </tbody>
         </table>
-        <input type="button" id="setOnePlane" value="Save Plane" />
+        <input type="button" id="setPlanes" value="Save Planes" />
+        <div id="planeValidator"></div>
     </div>
     <div>
         <p><b>Opponent grid:</b></p>
@@ -48,9 +53,10 @@
             </tbody>
         </table>
     </div>
+    
+    <input type="button" id="startButton" value="Start the game" />
 </div>
 
-<input type="button" id="startButton" value="Start the game" />
 
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script>
@@ -74,7 +80,11 @@ function createGrid(tableName, tableOwn)
             letter = (l+10).toString(36).toUpperCase();
             if (tableOwn == "opp")
             {
-                cells = '<td id="'+ tableOwn +'_'+ x + letter +'" class="cellCss" onclick="fire('+@Model.OpponentId + ',' + x + ',\'' + letter +'\')">'+ x + letter +'</td>';
+                var planePart = {
+                    X: x,
+                    Y: letter
+                };
+                cells = '<td id="'+ tableOwn +'_'+ x + letter +'" class="cellCss" onclick="fire('+ planePart +')">'+ x + letter +'</td>';
             }
             else
             {// onclick="setPlane('+ x + ',\'' + letter +'\')"
@@ -92,69 +102,84 @@ function createGrid(tableName, tableOwn)
     document.getElementById(tableName).firstElementChild.innerHTML = gridInnerHtml;
 }
 
-function fire(opponentId, x, y)
+function fire(planePart)
 {
-    console.log('pressed fire '+ x + y);
-    //connection.invoke("SendFiring", opponentId, x, y).catch(function (err) {
+    console.log('pressed fire '+ planePart.X + planePart.Y);
+    //connection.invoke("SendFiring", planePart).catch(function (err) {
     //    return console.error(err.toString());
     //});
 }
 
+
+var placedPlanes = [];
+var _gameId = "";
+
 function addClickedCss(row)
 {
-    row.classList.add('placedPlaneCss');
+    row.classList.add('placedPlaneCss');    
+    var coordinates = $(row).attr('id').replace('own_', '');
+    var x = coordinates.replace(/[^0-9.]/g, '');
+    var y = coordinates.replace(x, '');
+    var planePart = {
+        X: parseInt(x),
+        Y: y
+    };
+    placedPlanes.push(planePart);
 }
 
-$('#setOnePlane').click(function(){
-
-
-
-
-    connection.invoke("SetOnePlane", x, y).catch(function (err) {
-        return console.error(err.toString());
-    });
-});
-
-//function setOnePlane(x, y)
-//{
-//    console.log('pressed setPlane '+ x + y);
-//}
 
     "use strict";
     var connection = new signalR.HubConnectionBuilder().withUrl("/communicationHub").build();
 
-    //document.getElementById("fireButton").disabled = true;
-
-    connection.on("ReceiveFiringResult", function (opponentId, x, y) {
-
-        console.log('ReceiveFiringResult');
-        document.getElementById("fireResult").innerHTML = opponentId + ',' + x + ',' + y;
-
-    });
-
     connection.start().then(function () {
-        //document.getElementById("fireButton").disabled = false;
+        $('#gameDiv').hide();
+        console.log('AddWaitingPlayerIntoQueue');
+        document.getElementById("waitForOpponentMsg").innerHTML = "Waiting for opponent player ...";
+
+        connection.invoke("AddWaitingPlayerIntoQueue").catch(function (err) {
+            return console.error(err.toString());
+        });
     }).catch(function (err) {
         return console.error(err.toString());
     });
+    /*
+    $(document).ready(function() {
+        console.log('AddWaitingPlayerIntoQueue');
+        document.getElementById("waitForOpponentMsg").innerHTML = "Waiting for opponent player ...";
+
+        connection.invoke("AddWaitingPlayerIntoQueue").catch(function (err) {
+            return console.error(err.toString());
+        });
+    });   */
+
+    connection.on("GameStarted", function (gameId) {
+        console.log('GameStarted with gameId: ' + gameId);
+        _gameId = gameId;
+        $('#gameDiv').show();
+        document.getElementById("waitForOpponentMsg").innerHTML = "Let's begin the game. Set your planes!";
+    });
 
 
-    //$("*[id*='opp_']").addEventListener("click", function (event) {
-
-    ////document.getElementById("fireButton").addEventListener("click", function (event) {
-
-    //    var opponentId = "1";
-    //    var x = 1;
-    //    var y = 'A';
-
-    //    connection.invoke("SendFiring", opponentId, x, y).catch(function (err) {
-    //        return console.error(err.toString());
-    //    });
-    //    event.preventDefault();
-    //});
+    connection.on("ValidatePlane", function (message) {
+        console.log('ValidatePlane');
+        document.getElementById("planeValidator").innerHTML = message;
+    });
+    connection.on("ReceiveFiringResult", function (opponentId, x, y) {
+        console.log('ReceiveFiringResult');
+        document.getElementById("fireResult").innerHTML = opponentId + ',' + x + ',' + y;
+    });
 
 
+    
+$('#setPlanes').click(function(){
+    console.log('clicked setPlanes');
+    console.log(placedPlanes);
 
+    connection.invoke("SetPlanes", placedPlanes, _gameId).catch(function (err) {
+        return console.error(err.toString());
+    });
+   
+});
 
 
 

@@ -1,22 +1,17 @@
 ﻿namespace PlaneProject.Models
 {
-    public class PlanePart
+
+    public struct PlanePart
     {
-        public PlanePart(byte x, char y)
-        { 
+        public PlanePart(int x, char y)
+        {
             this.X = x;
             this.Y = y;
         }
-
-        public byte X { get; set; }
+        public int X { get; set; }
         public char Y { get; set; }
-        public bool IsCabin { get; set; }
+        public bool IsCabin { get; set; } = false;
         public PlanePartType Status { get; set; } = PlanePartType.Air;
-
-        public override string ToString()
-        {
-            return this.X + this.Y.ToString().ToUpper();
-        }
     }
 
     public enum PlanePartType

@@ -7,7 +7,7 @@ namespace PlaneProject.Controllers
     {
         public IActionResult Index()
         {
-            Player player = new Player(true);
+            Player player = new Player("123456");
             //player.OpponentId = "2";
             //player.OwnPlanes = 
 
