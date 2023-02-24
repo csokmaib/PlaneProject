@@ -1,7 +1,6 @@
 ﻿namespace PlaneProject.Models
 {
-
-    public struct PlanePart
+    public struct PlanePart : IEquatable<PlanePart>
     {
         public PlanePart(int x, char y)
         {
@@ -12,6 +11,11 @@
         public char Y { get; set; }
         public bool IsCabin { get; set; } = false;
         public PlanePartType Status { get; set; } = PlanePartType.Air;
+
+        public bool Equals(PlanePart other)
+        {
+            return X == other.X && Y == other.Y && IsCabin == other.IsCabin && Status == other.Status;
+        }
     }
 
     public enum PlanePartType

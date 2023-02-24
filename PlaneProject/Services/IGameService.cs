@@ -6,6 +6,6 @@ namespace PlaneProject.Services
     {
         void RegisterPlayer(string connectionId, Guid playerId);
         (string ConnectionId1, string ConnectionId2, Guid GameId) AddWaitingPlayerIntoQueue(string connectionId);
-        bool SetPlanes(List<PlanePart> planes, string gameId, string connectionId);
+        (string ConnectionId1, string ConnectionId2, bool IsPlayer1Turn) SetPlanes(List<PlanePart> planes, string gameId, string connectionId);
     }
 }

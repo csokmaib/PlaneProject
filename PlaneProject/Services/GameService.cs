@@ -42,25 +42,27 @@ namespace PlaneProject.Services
             return (null, null, Guid.Empty);
         }
 
-        public bool SetPlanes(List<PlanePart> planes, string gameId, string connectionId)
+        public (string ConnectionId1, string ConnectionId2, bool IsPlayer1Turn) SetPlanes(List<PlanePart> planes, string gameId, string connectionId)
         {
             if (Guid.TryParse(gameId, out var gameGuid))
             {
-                if (!_gameList.Any(g => g.Id.Equals(gameGuid)))  return false;
+                if (!_gameList.Any(g => g.Id.Equals(gameGuid)))  return (null, null, false);
 
                 var game = _gameList.Single(g => g.Id.Equals(gameGuid));
 
                 if (game.PlaceThePlanes(planes, connectionId))
                 {
-                    //TO DO: if the all planes are placed, get to the next turn
-
-                    return true;
+                    if (game.AllPlaneArePlaced)
+                    {
+                        var gamePlayers = game.GetGamePlayers();
+                        return (gamePlayers.Player1.ConnectionId, gamePlayers.Player2.ConnectionId, game.IsPlayer1Turn);
+                    }                    
                 }
             }
-            return false;
+            return (null, null, false);
         }
 
-
+        
 
 
 

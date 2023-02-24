@@ -24,21 +24,33 @@ namespace PlaneProject.Services
             }
         }
 
-        public async Task SendFiring(string opponentId, byte x, char y)
+        public async Task SetPlanes(List<PlanePart> planes, string gameId)
         {
-            await Clients.All.SendAsync("ReceiveFiringResult", opponentId, x, y);
+            //string message = "";
+
+            var result = _gameService.SetPlanes(planes, gameId, Context.ConnectionId);
+
+            if (result.ConnectionId1 != null && result.ConnectionId2 != null)
+            {
+                await Clients.Client(result.ConnectionId1).SendAsync("NextTurn", result.IsPlayer1Turn);
+                await Clients.Client(result.ConnectionId2).SendAsync("NextTurn", !result.IsPlayer1Turn);
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("WaitForOpponentToSetPlanes");
+            }
+
+            //await Clients.All.SendAsync("ValidatePlanes", message, success);
+            //await Clients.All.SendAsync("ReceiveFiringResult", , x, y);
             //await Clients.Group(myId).SendAsync("ReceiveFiringResult", myId, x, y);
             //await Clients.User(opponentId).SendAsync("ReceiveFiringResult", opponentId, x, y);
         }
 
-        public async Task SetPlanes(List<PlanePart> planes, string gameId)
+        public async Task SendFiring(string opponentId, byte x, char y)
         {
-            string message = "";
 
-            bool success = _gameService.SetPlanes(planes, gameId, Context.ConnectionId);
 
-            await Clients.All.SendAsync("ValidatePlanes", message);
-            //await Clients.All.SendAsync("ReceiveFiringResult", , x, y);
+            //await Clients.All.SendAsync("ReceiveFiringResult", opponentId, x, y);
             //await Clients.Group(myId).SendAsync("ReceiveFiringResult", myId, x, y);
             //await Clients.User(opponentId).SendAsync("ReceiveFiringResult", opponentId, x, y);
         }
