@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PlaneProject.Models;
 
 namespace PlaneProject.Controllers
 {
@@ -7,15 +6,7 @@ namespace PlaneProject.Controllers
     {
         public IActionResult Index()
         {
-            Player player = new Player("123456");
-            //player.OpponentId = "2";
-            //player.OwnPlanes = 
-
-
-
-
-
-            return View("Index", player);
+            return View("Index");
         }
     }
 }

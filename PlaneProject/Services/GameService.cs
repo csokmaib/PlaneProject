@@ -62,9 +62,27 @@ namespace PlaneProject.Services
             return (null, null, false);
         }
 
-        
+        public (List<PlanePart> HitResult, string ConnectionId1, string ConnectionId2, bool IsPlayer1Turn) 
+            CheckIfHit(PlanePart planePart, string gameId, string connectionId)
+        {
+            if (Guid.TryParse(gameId, out var gameGuid))
+            {
+                if (!_gameList.Any(g => g.Id.Equals(gameGuid))) return (new List<PlanePart>(), null, null, false);
 
+                var game = _gameList.Single(g => g.Id.Equals(gameGuid));
 
+                List<PlanePart> hitResult = game.CheckIfHit(planePart, connectionId);
 
+                var gamePlayers = game.GetGamePlayers();
+                if (game.IsPlayer1Turn) game.IsPlayer1Turn = false;
+                else game.IsPlayer1Turn = true;
+                return (hitResult, gamePlayers.Player1.ConnectionId, gamePlayers.Player2.ConnectionId, game.IsPlayer1Turn);
+            }
+
+            return (new List<PlanePart>(), null, null, false);
+        }
+
+        //TO DO: make logic for who is the winner
+        //TO DO: disconnect player
     }
 }

@@ -1,10 +1,6 @@
 ﻿@using PlaneProject.Models
 
-@model Player
-
-@{
-}
-
+@*TO DO: move into css file*@
 <style>
 .cellCss {
     width:30px;height:30px;border:solid;padding:unset;text-align:center;cursor: crosshair;
@@ -50,13 +46,9 @@
     </div> 
 </div>
 
+@*TO DO: move into js file*@
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script>
-$(document).ready(function() {
-    createGrid("ownGrid", "own");
-    createGrid("opponentGrid", "opp");
-});
-
 function createGrid(tableName, tableOwn)
 {
     var gridInnerHtml = '';
@@ -104,7 +96,7 @@ function ownClickedCss(row)
     };
     if ($(row).hasClass("placedPlaneCss"))
     {
-        $(row).removeClass('placedPlaneCss');        
+        $(row).removeClass('placedPlaneCss');
         for (var i = placedPlanes.length - 1; i >= 0; --i) 
         {
             if (placedPlanes[i].X == parseInt(x) && placedPlanes[i].Y == y) {
@@ -123,36 +115,37 @@ function ownClickedCss(row)
 var connection = new signalR.HubConnectionBuilder().withUrl("/communicationHub").build();
 
 connection.start().then(function () {
+
     $('#gameDiv').hide();
-    //console.log('AddWaitingPlayerIntoQueue');
     $('#msgForPlayer').text("Waiting for opponent player ...");
     placedPlanes = [];
 
     connection.invoke("AddWaitingPlayerIntoQueue").catch(function (err) {
         return console.error(err.toString());
     });
+
 }).catch(function (err) {
     return console.error(err.toString());
 });
 
 connection.on("GameStarted", function (gameId) {
-    //console.log('GameStarted with gameId: ' + gameId);
     _gameId = gameId;
+
+    createGrid("ownGrid", "own");
+    createGrid("opponentGrid", "opp");
+
     $('#gameDiv').show();
     $('#msgForPlayer').text("Let's begin! Set 1 plane on your grid!");
     $('#opponentDiv').hide();
 });
     
 $('#setPlanesBtn').click(function(){
-    //console.log('clicked setPlanes');
-    //console.log(placedPlanes);
     connection.invoke("SetPlanes", placedPlanes, _gameId).catch(function (err) {
         return console.error(err.toString());
     });   
 });
 
 connection.on("WaitForOpponentToSetPlanes", function () {
-    //console.log('WaitForOpponentToSetPlanes');
     $('#msgForPlayer').text("Waiting for your opponent to set his/her planes...");
     HideOwnAfterSet();
 });
@@ -161,14 +154,11 @@ function HideOwnAfterSet()
 {
     $('#setPlanesBtn').hide();
     $("*[id*='own_']").each(function () {
-        //console.log($(this));
         $(this).removeAttr("onclick");
     });
 }
 
 connection.on("NextTurn", function (itsPlayerTurn) {
-    console.log('NextTurn, itsPlayerTurn: ' + itsPlayerTurn);
-
     HideOwnAfterSet();
     if (itsPlayerTurn)
     {
@@ -194,18 +184,67 @@ function fire(row)
         X: parseInt(x),
         Y: y
     };
-
-    console.log('pressed fire '+ planePart.X + planePart.Y);
-
-    //connection.invoke("SendFiring", planePart).catch(function (err) {
-    //    return console.error(err.toString());
-    //});
+    connection.invoke("SendFiring", planePart, _gameId).catch(function (err) {
+        return console.error(err.toString());
+    });
 }
-/*
-connection.on("ReceiveFiringResult", function (opponentId, x, y) {
-    console.log('ReceiveFiringResult');
-    document.getElementById("fireResult").innerHTML = opponentId + ',' + x + ',' + y;
-});
-*/
 
+connection.on("NextFire", function (planePartList, itsPlayerTurn) {
+    console.log('NextFire, itsPlayerTurn: ' + itsPlayerTurn);
+    $('#opponentDiv').show();
+
+    Object.keys(planePartList).forEach(function(key) {
+        var className = "";
+        if (planePartList[key].status == 1) { className = 'wrongPlaneCss'; }
+        if (planePartList[key].status == 2) { className = 'hitPlaneCss'; }
+        if (planePartList[key].status == 3) { className = 'deadPlaneCss'; }
+
+        console.log($('#own_' + planePartList[key].x + planePartList[key].y));
+        console.log(className);
+
+        if (itsPlayerTurn)
+        {
+            $('#msgForPlayer').text("Your turn! Make your attack!");
+            $('#own_' + planePartList[key].x + planePartList[key].y).removeClass('placedPlaneCss');
+            $('#own_' + planePartList[key].x + planePartList[key].y).addClass(className);
+        }
+        else
+        {
+            $('#msgForPlayer').text("Wait for opponent attack!");
+            $('#opp_' + planePartList[key].x + planePartList[key].y).removeClass('placedPlaneCss');           
+            $('#opp_' + planePartList[key].x + planePartList[key].y).addClass(className);            
+        }
+    });    
+    //TO DO disable opponent grid or onclick event when it's the other player's turn
+   
+});
+
+
+//TO DO: don't restart the game at page refresh, use cookies to check if the game is already started
+/*
+function setCookieValue(cookieName, cookieValue) {
+    var d = new Date();
+    var hour = 2;
+    d.setTime(d.getTime() + (hour * 60 * 60 * 1000));
+    var cookieExpireDate = "expires=" + d.toString();
+    document.cookie = cookieName + "=" + cookieValue + "; " + cookieExpireDate;
+}
+
+function getCookieValue(name) {
+    cookieList = document.cookie.split('; ');
+    cookies = {};
+    for (i = cookieList.length - 1; i >= 0; i--) {
+        cookie = cookieList[i].split('=');
+        cookies[cookie[0]] = cookie[1];
+    }
+    return cookies[name];
+}
+
+function deleteCookieValue(cookieName) {
+    var d = new Date();
+    d.setTime(d.getTime());
+    var cookieExpireDate = "expires=" + d.toString();
+    document.cookie = cookieName + "=expired;" + cookieExpireDate;
+}
+*/
 </script>

@@ -26,8 +26,7 @@ namespace PlaneProject.Services
 
         public async Task SetPlanes(List<PlanePart> planes, string gameId)
         {
-            //string message = "";
-
+            //TO DO: send message if the planes are not placed correctly
             var result = _gameService.SetPlanes(planes, gameId, Context.ConnectionId);
 
             if (result.ConnectionId1 != null && result.ConnectionId2 != null)
@@ -38,22 +37,20 @@ namespace PlaneProject.Services
             else
             {
                 await Clients.Client(Context.ConnectionId).SendAsync("WaitForOpponentToSetPlanes");
-            }
-
-            //await Clients.All.SendAsync("ValidatePlanes", message, success);
-            //await Clients.All.SendAsync("ReceiveFiringResult", , x, y);
-            //await Clients.Group(myId).SendAsync("ReceiveFiringResult", myId, x, y);
-            //await Clients.User(opponentId).SendAsync("ReceiveFiringResult", opponentId, x, y);
+            }  
         }
 
-        public async Task SendFiring(string opponentId, byte x, char y)
+        public async Task SendFiring(PlanePart planePart, string gameId)
         {
+            var result = _gameService.CheckIfHit(planePart, gameId, Context.ConnectionId);
 
-
-            //await Clients.All.SendAsync("ReceiveFiringResult", opponentId, x, y);
-            //await Clients.Group(myId).SendAsync("ReceiveFiringResult", myId, x, y);
-            //await Clients.User(opponentId).SendAsync("ReceiveFiringResult", opponentId, x, y);
+            if (result.ConnectionId1 != null && result.ConnectionId2 != null)
+            {
+                await Clients.Client(result.ConnectionId1).SendAsync("NextFire", result.HitResult, result.IsPlayer1Turn);
+                await Clients.Client(result.ConnectionId2).SendAsync("NextFire", result.HitResult, !result.IsPlayer1Turn);
+            }
         }
 
+        //TO DO: combine NextTurn with NextFire
     }
 }

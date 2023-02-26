@@ -35,5 +35,21 @@
         {
             return (_player1, _player2);
         }
+
+        public List<PlanePart> CheckIfHit(PlanePart planePart, string connectionId)
+        {
+            List<PlanePart> result = new List<PlanePart>();
+            if (IsPlayer1Turn && _player1.ConnectionId.Equals(connectionId))
+            {
+                result = _player2Grid.CheckIfHit(planePart);
+            }
+
+            if (!IsPlayer1Turn && _player2.ConnectionId.Equals(connectionId))
+            {
+                result = _player1Grid.CheckIfHit(planePart);
+            }
+
+            return result;
+        }
     }
 }

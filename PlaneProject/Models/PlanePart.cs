@@ -1,6 +1,6 @@
 ﻿namespace PlaneProject.Models
 {
-    public struct PlanePart : IEquatable<PlanePart>
+    public class  PlanePart : IEquatable<PlanePart>
     {
         public PlanePart(int x, char y)
         {
