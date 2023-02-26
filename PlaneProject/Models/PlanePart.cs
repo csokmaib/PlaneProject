@@ -1,21 +1,20 @@
 ﻿namespace PlaneProject.Models
 {
-    public class PlanePart
+    public class  PlanePart : IEquatable<PlanePart>
     {
-        public PlanePart(byte x, char y)
-        { 
+        public PlanePart(int x, char y)
+        {
             this.X = x;
             this.Y = y;
         }
-
-        public byte X { get; set; }
+        public int X { get; set; }
         public char Y { get; set; }
-        public bool IsCabin { get; set; }
+        public bool IsCabin { get; set; } = false;
         public PlanePartType Status { get; set; } = PlanePartType.Air;
 
-        public override string ToString()
+        public bool Equals(PlanePart other)
         {
-            return this.X + this.Y.ToString().ToUpper();
+            return X == other.X && Y == other.Y && IsCabin == other.IsCabin && Status == other.Status;
         }
     }
 
